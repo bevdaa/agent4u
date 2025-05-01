@@ -22,7 +22,7 @@ interface ToolFiltersProps {
 const ToolFilters = ({ onSearch, onFilterChange }: ToolFiltersProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [category, setCategory] = useState(searchParams.get('category') || '');
+  const [category, setCategory] = useState(searchParams.get('category') || 'all');
   const [referralOnly, setReferralOnly] = useState<boolean>(searchParams.get('referral') === 'true');
   const [affiliateOnly, setAffiliateOnly] = useState<boolean>(searchParams.get('affiliate') === 'true');
   const [freeTrialOnly, setFreeTrialOnly] = useState<boolean>(searchParams.get('freeTrial') === 'true');
@@ -30,7 +30,7 @@ const ToolFilters = ({ onSearch, onFilterChange }: ToolFiltersProps) => {
   
   useEffect(() => {
     const filters = {
-      category,
+      category: category === 'all' ? '' : category,
       referralOnly,
       affiliateOnly,
       freeTrialOnly,
@@ -42,7 +42,7 @@ const ToolFilters = ({ onSearch, onFilterChange }: ToolFiltersProps) => {
     // Update search params
     const params = new URLSearchParams();
     if (searchQuery) params.set('search', searchQuery);
-    if (category) params.set('category', category);
+    if (category !== 'all') params.set('category', category);
     if (referralOnly) params.set('referral', 'true');
     if (affiliateOnly) params.set('affiliate', 'true');
     if (freeTrialOnly) params.set('freeTrial', 'true');
@@ -66,7 +66,7 @@ const ToolFilters = ({ onSearch, onFilterChange }: ToolFiltersProps) => {
   
   const handleReset = () => {
     setSearchQuery('');
-    setCategory('');
+    setCategory('all');
     setReferralOnly(false);
     setAffiliateOnly(false);
     setFreeTrialOnly(false);
@@ -115,7 +115,7 @@ const ToolFilters = ({ onSearch, onFilterChange }: ToolFiltersProps) => {
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
               ))}
