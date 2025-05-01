@@ -2,8 +2,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import * as THREE from 'three';
-// @ts-ignore - Vanta doesn't have TypeScript definitions
-import WAVES from 'vanta/dist/vanta.waves.min';
 
 interface AnimatedBackgroundProps {
   children: React.ReactNode;
@@ -15,26 +13,40 @@ const AnimatedBackground = ({ children }: AnimatedBackgroundProps) => {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    if (!vantaEffect && vantaRef.current) {
-      setVantaEffect(
-        WAVES({
-          el: vantaRef.current,
-          THREE: THREE,
-          mouseControls: false,
-          touchControls: false,
-          gyroControls: false,
-          minHeight: 200,
-          minWidth: 200,
-          scale: isMobile ? 1.0 : 1.5,
-          scaleMobile: 1.0,
-          color: 0x9b87f5, // Agent purple color
-          shininess: 35,
-          waveHeight: 15,
-          waveSpeed: 0.75,
-          zoom: 0.9
-        })
-      );
-    }
+    // Dynamic import to avoid SSR issues and to only load when needed
+    const loadVanta = async () => {
+      if (!vantaEffect && vantaRef.current) {
+        try {
+          // Dynamically import the vanta waves effect
+          const WAVES = (await import('vanta/dist/vanta.waves.min')).default;
+          
+          setVantaEffect(
+            WAVES({
+              el: vantaRef.current,
+              THREE: THREE,
+              mouseControls: false,
+              touchControls: false,
+              gyroControls: false,
+              minHeight: 200,
+              minWidth: 200,
+              scale: isMobile ? 1.0 : 1.5,
+              scaleMobile: 1.0,
+              color: 0x9b87f5, // Agent purple color
+              shininess: 35,
+              waveHeight: 15,
+              waveSpeed: 0.75,
+              zoom: 0.9
+            })
+          );
+        } catch (error) {
+          console.error("Failed to load Vanta effect:", error);
+          // Fall back to static background if Vanta fails to load
+          setPrefersReducedMotion(true);
+        }
+      }
+    };
+
+    loadVanta();
 
     return () => {
       if (vantaEffect) vantaEffect.destroy();
