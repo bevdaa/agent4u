@@ -1,41 +1,53 @@
-
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import PageHeader from "@/components/ui/PageHeader";
 import ToolCard from "@/components/tools/ToolCard";
 import ToolFilters from "@/components/tools/ToolFilters";
-import { Tool, getAllTools } from "@/data/tools";
+import { Tool, fetchAllTools } from "@/services/toolsService";
+import { categories } from "@/data/tools";
 
 const ToolsPage = () => {
   const [searchParams] = useSearchParams();
   const [tools, setTools] = useState<Tool[]>([]);
   const [filteredTools, setFilteredTools] = useState<Tool[]>([]);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Get all tools
-    const allTools = getAllTools();
-    setTools(allTools);
-    
-    // Apply initial filters from URL params
-    const initialCategory = searchParams.get('category') || '';
-    const initialReferral = searchParams.get('referral') === 'true';
-    const initialAffiliate = searchParams.get('affiliate') === 'true';
-    const initialFreeTrial = searchParams.get('freeTrial') === 'true';
-    const initialSort = searchParams.get('sort') || 'featured';
-    const initialSearch = searchParams.get('search') || '';
-    
-    setSearchQuery(initialSearch);
-    
-    const initialFilters = {
-      category: initialCategory,
-      referralOnly: initialReferral,
-      affiliateOnly: initialAffiliate,
-      freeTrialOnly: initialFreeTrial,
-      sort: initialSort
+    const loadTools = async () => {
+      setLoading(true);
+      try {
+        // Fetch tools from Supabase
+        const allTools = await fetchAllTools();
+        setTools(allTools);
+        
+        // Apply initial filters from URL params
+        const initialCategory = searchParams.get('category') || '';
+        const initialReferral = searchParams.get('referral') === 'true';
+        const initialAffiliate = searchParams.get('affiliate') === 'true';
+        const initialFreeTrial = searchParams.get('freeTrial') === 'true';
+        const initialSort = searchParams.get('sort') || 'featured';
+        const initialSearch = searchParams.get('search') || '';
+        
+        setSearchQuery(initialSearch);
+        
+        const initialFilters = {
+          category: initialCategory,
+          referralOnly: initialReferral,
+          affiliateOnly: initialAffiliate,
+          freeTrialOnly: initialFreeTrial,
+          sort: initialSort
+        };
+        
+        applyFilters(allTools, initialFilters, initialSearch);
+      } catch (err) {
+        console.error("Error loading tools:", err);
+      } finally {
+        setLoading(false);
+      }
     };
     
-    applyFilters(allTools, initialFilters, initialSearch);
+    loadTools();
   }, []);
   
   const handleSearch = (query: string) => {
@@ -90,7 +102,6 @@ const ToolsPage = () => {
     } else if (filters.sort === 'za') {
       result.sort((a, b) => b.name.localeCompare(a.name));
     }
-    // 'featured' is the default and doesn't need sorting as the data comes pre-sorted
     
     setFilteredTools(result);
   };
@@ -113,7 +124,21 @@ const ToolsPage = () => {
         </div>
         
         <div className="lg:w-3/4">
-          {filteredTools.length > 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="border rounded-lg p-6 animate-pulse">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-gray-200 rounded-md"></div>
+                    <div className="flex-1">
+                      <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredTools.length > 0 ? (
             <>
               <p className="mb-6 text-gray-600">
                 Showing {filteredTools.length} {filteredTools.length === 1 ? 'tool' : 'tools'}

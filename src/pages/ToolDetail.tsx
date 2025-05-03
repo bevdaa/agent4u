@@ -1,27 +1,55 @@
-
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getToolById, Tool } from "@/data/tools";
+import { Tool, fetchToolById } from "@/services/toolsService";
 import N8nWorkflow from "@/components/tools/N8nWorkflow";
 
 const ToolDetailPage = () => {
   const { toolId } = useParams<{ toolId: string }>();
   const [tool, setTool] = useState<Tool | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    if (toolId) {
-      const foundTool = getToolById(toolId);
-      
-      if (foundTool) {
-        setTool(foundTool);
-      } else {
+    const loadTool = async () => {
+      if (!toolId) {
         setNotFound(true);
+        setLoading(false);
+        return;
       }
-    }
+      
+      setLoading(true);
+      try {
+        const foundTool = await fetchToolById(toolId);
+        
+        if (foundTool) {
+          setTool(foundTool);
+        } else {
+          setNotFound(true);
+        }
+      } catch (err) {
+        console.error("Error loading tool:", err);
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadTool();
   }, [toolId]);
+  
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="animate-pulse">
+          <div className="h-12 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
+          <div className="h-6 bg-gray-200 rounded w-2/3 mx-auto mb-12"></div>
+          <div className="h-64 bg-gray-200 rounded mb-6"></div>
+        </div>
+      </div>
+    );
+  }
   
   if (notFound) {
     return (

@@ -9,7 +9,66 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      ai_tools: {
+        Row: {
+          affiliate_link: string | null
+          affiliate_program: string | null
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          integration_type: string | null
+          logo_url: string | null
+          n8n_json: Json | null
+          referral_bonus: string | null
+          referral_link: string | null
+          signup_bonus: string | null
+          tags: string[] | null
+          tool_name: string
+          tool_url: string
+          trial_benefit: string | null
+          use_case: string | null
+        }
+        Insert: {
+          affiliate_link?: string | null
+          affiliate_program?: string | null
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          integration_type?: string | null
+          logo_url?: string | null
+          n8n_json?: Json | null
+          referral_bonus?: string | null
+          referral_link?: string | null
+          signup_bonus?: string | null
+          tags?: string[] | null
+          tool_name: string
+          tool_url: string
+          trial_benefit?: string | null
+          use_case?: string | null
+        }
+        Update: {
+          affiliate_link?: string | null
+          affiliate_program?: string | null
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          integration_type?: string | null
+          logo_url?: string | null
+          n8n_json?: Json | null
+          referral_bonus?: string | null
+          referral_link?: string | null
+          signup_bonus?: string | null
+          tags?: string[] | null
+          tool_name?: string
+          tool_url?: string
+          trial_benefit?: string | null
+          use_case?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
