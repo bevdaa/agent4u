@@ -117,7 +117,9 @@ const ToolFilters = ({ onSearch, onFilterChange }: ToolFiltersProps) => {
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
-                <SelectItem key={category} value={category}>{category.charAt(0).toUpperCase() + category.slice(1)}</SelectItem>
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
