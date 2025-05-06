@@ -50,3 +50,26 @@ export async function fetchAllTools(): Promise<Tool[]> {
   const data = await response.json();
   return data.map(mapDbRowToTool);
 }
+
+// Function to fetch a single tool by ID
+export async function fetchToolById(id: string): Promise<Tool | null> {
+  const response = await fetch(`https://uttyuqzdklcjnivmeszo.supabase.co/rest/v1/ai_tools?id=eq.${id}`, {
+    method: 'GET',
+    headers: {
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0dHl1cXpka2xjam5pdm1lc3pvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1MTA0ODcsImV4cCI6MjA2MjA4NjQ4N30.DdV0z80AK3ybzqgQTDZtHNUW1na61gkJ4RQiAJsWJWQ',
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0dHl1cXpka2xjam5pdm1lc3pvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1MTA0ODcsImV4cCI6MjA2MjA4NjQ4N30.DdV0z80AK3ybzqgQTDZtHNUW1na61gkJ4RQiAJsWJWQ'
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error fetching tool: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  
+  if (data.length === 0) {
+    return null;
+  }
+  
+  return mapDbRowToTool(data[0]);
+}

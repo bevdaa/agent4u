@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,14 @@ const ToolDetailPage = () => {
     );
   }
   
+  // Function to get category display name
+  const formatCategory = (category: string[] | string) => {
+    if (Array.isArray(category) && category.length > 0) {
+      return category[0].charAt(0).toUpperCase() + category[0].slice(1);
+    }
+    return typeof category === 'string' ? category.charAt(0).toUpperCase() + category.slice(1) : 'General';
+  };
+  
   return (
     <div className="container mx-auto px-4 py-12 max-w-5xl">
       <div className="mb-6">
@@ -97,24 +106,12 @@ const ToolDetailPage = () => {
           <h1 className="text-3xl md:text-4xl font-bold mb-2">{tool.name}</h1>
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline" className="bg-agent-light-purple/30 text-agent-dark-purple border-agent-purple/20">
-              {tool.category.charAt(0).toUpperCase() + tool.category.slice(1)}
+              {formatCategory(tool.category)}
             </Badge>
             
-            {tool.freeTrial && (
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                Free Trial
-              </Badge>
-            )}
-            
-            {tool.referralAvailable && (
+            {tool.referral_tag && (
               <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                Referral Bonus
-              </Badge>
-            )}
-            
-            {tool.affiliateProgram && (
-              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                Affiliate Program
+                Referral Available
               </Badge>
             )}
           </div>
@@ -135,15 +132,15 @@ const ToolDetailPage = () => {
           {/* Tool Description */}
           <div className="bg-white shadow-sm rounded-xl border p-6 mb-8">
             <h2 className="text-2xl font-bold mb-4">About {tool.name}</h2>
-            <p className="text-gray-700">{tool.description}</p>
+            <p className="text-gray-700">{tool.summary}</p>
           </div>
           
           {/* N8n Workflow */}
-          {tool.n8nWorkflow && (
+          {tool.n8n_use_case && tool.n8n_workflow_url && (
             <N8nWorkflow 
-              steps={tool.n8nWorkflow.steps}
-              json={tool.n8nWorkflow.json}
-              useCase={tool.n8nWorkflow.useCase}
+              steps={["Connect to n8n", "Import the workflow", "Configure your credentials"]}
+              json={`{"nodes": [{"name": "${tool.name}", "type": "n8n-nodes-base.webhook"}]}`}
+              useCase={tool.n8n_use_case}
             />
           )}
         </div>
@@ -154,37 +151,16 @@ const ToolDetailPage = () => {
             <h2 className="text-xl font-bold mb-4">Deal Details</h2>
             
             <div className="bg-agent-light-purple/20 border border-agent-purple/30 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-lg">{tool.deal.title}</h3>
-              <p className="mt-2 text-gray-700">{tool.deal.description}</p>
-              {tool.deal.details && (
-                <p className="mt-2 text-sm text-gray-600">{tool.deal.details}</p>
-              )}
+              <h3 className="font-semibold text-lg">{tool.offer_detail || "Special Offer"}</h3>
+              <p className="mt-2 text-gray-700">{tool.summary}</p>
             </div>
             
             <div className="space-y-4">
-              {tool.freeTrial && (
-                <div>
-                  <h4 className="font-medium">Free Trial</h4>
-                  <p className="text-sm text-gray-700">
-                    This tool offers a free trial period to test all features.
-                  </p>
-                </div>
-              )}
-              
-              {tool.referralAvailable && (
+              {tool.referral_tag && (
                 <div>
                   <h4 className="font-medium">Referral Program</h4>
                   <p className="text-sm text-gray-700">
                     Earn rewards by referring friends to this tool.
-                  </p>
-                </div>
-              )}
-              
-              {tool.affiliateProgram && (
-                <div>
-                  <h4 className="font-medium">Affiliate Program</h4>
-                  <p className="text-sm text-gray-700">
-                    Earn commissions by promoting this tool.
                   </p>
                 </div>
               )}
@@ -193,13 +169,15 @@ const ToolDetailPage = () => {
             <div className="mt-6 space-y-3">
               <Button asChild className="w-full">
                 <a href={tool.website} target="_blank" rel="noopener noreferrer">
-                  Claim Deal
+                  {tool.cta_label || "Claim Deal"}
                 </a>
               </Button>
               
-              {tool.n8nWorkflow && (
-                <Button variant="outline" className="w-full">
-                  Try n8n Workflow
+              {tool.n8n_workflow_url && (
+                <Button variant="outline" className="w-full" asChild>
+                  <a href={tool.n8n_workflow_url} target="_blank" rel="noopener noreferrer">
+                    Try n8n Workflow
+                  </a>
                 </Button>
               )}
             </div>
