@@ -19,6 +19,9 @@ export type Tool = {
     description: string;
     details?: string;
   };
+  dealType: 'free-trial' | 'referral' | 'credit' | 'discount';
+  bonusType: string;
+  featured: boolean;
   n8nWorkflow?: {
     steps: string[];
     json: string;
@@ -30,6 +33,16 @@ export type Tool = {
 export function mapDbRowToTool(
   dbRow: Database['public']['Tables']['ai_tools']['Row']
 ): Tool {
+  // Determine dealType based on available fields
+  let dealType: 'free-trial' | 'referral' | 'credit' | 'discount' = 'free-trial';
+  if (dbRow.referral_link) dealType = 'referral';
+  else if (dbRow.signup_bonus) dealType = 'credit';
+  
+  // Determine bonusType
+  let bonusType = 'Free Trial';
+  if (dbRow.referral_bonus) bonusType = 'Referral';
+  else if (dbRow.signup_bonus) bonusType = 'Credit';
+  
   return {
     id: dbRow.id,
     name: dbRow.tool_name,
@@ -41,6 +54,9 @@ export function mapDbRowToTool(
     referralAvailable: !!dbRow.referral_link,
     freeTrial: !!dbRow.trial_benefit,
     affiliateProgram: !!dbRow.affiliate_program,
+    dealType: dealType,
+    bonusType: bonusType,
+    featured: true, // Default all tools to featured for now
     deal: {
       title: dbRow.trial_benefit || dbRow.signup_bonus || 'Special Offer',
       description: dbRow.description?.substring(0, 150) + '...' || 'Check website for details',
