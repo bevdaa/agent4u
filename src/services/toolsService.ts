@@ -64,7 +64,7 @@ export async function fetchToolById(id: string): Promise<Tool | null> {
     const { data, error } = await supabase
       .from('ai_tools')
       .select('*')
-      .eq('id', id)
+      .eq('id', parseInt(id, 10))
       .single();
     
     if (error) {
