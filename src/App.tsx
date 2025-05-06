@@ -9,6 +9,7 @@ import RootLayout from "./components/layouts/RootLayout";
 import HomePage from "./pages/Index";
 import ToolsPage from "./pages/Tools";
 import ToolDetailPage from "./pages/ToolDetail";
+import ProductsPage from "./pages/Products";
 import AboutPage from "./pages/About";
 import ContactPage from "./pages/Contact";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,7 @@ const App = () => (
             <Route index element={<HomePage />} />
             <Route path="tools" element={<ToolsPage />} />
             <Route path="tools/:toolId" element={<ToolDetailPage />} />
+            <Route path="products" element={<ProductsPage />} />
             <Route path="about" element={<AboutPage />} />
             <Route path="contact" element={<ContactPage />} />
             <Route path="*" element={<NotFound />} />
