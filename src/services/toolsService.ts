@@ -19,7 +19,7 @@ export type Tool = {
 // Function to map Supabase data to our frontend Tool type
 export function mapDbRowToTool(dbRow: any): Tool {
   return {
-    id: dbRow.id,
+    id: dbRow.id.toString(),
     name: dbRow.name,
     website: dbRow.tool_url || '',
     logo: dbRow.logo_url || '/placeholder.svg',
@@ -35,41 +35,70 @@ export function mapDbRowToTool(dbRow: any): Tool {
 
 // Function to fetch all tools from Supabase
 export async function fetchAllTools(): Promise<Tool[]> {
-  const response = await fetch('https://uttyuqzdklcjnivmeszo.supabase.co/rest/v1/ai_tools', {
-    method: 'GET',
-    headers: {
-      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0dHl1cXpka2xjam5pdm1lc3pvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1MTA0ODcsImV4cCI6MjA2MjA4NjQ4N30.DdV0z80AK3ybzqgQTDZtHNUW1na61gkJ4RQiAJsWJWQ',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0dHl1cXpka2xjam5pdm1lc3pvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1MTA0ODcsImV4cCI6MjA2MjA4NjQ4N30.DdV0z80AK3ybzqgQTDZtHNUW1na61gkJ4RQiAJsWJWQ'
+  try {
+    // Use the Supabase client instead of direct fetch
+    const { data, error } = await supabase
+      .from('ai_tools')
+      .select('*');
+    
+    if (error) {
+      console.error("Error fetching tools:", error);
+      throw new Error(`Error fetching tools: ${error.message}`);
     }
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Error fetching tools: ${response.statusText}`);
+    
+    if (!data || data.length === 0) {
+      console.log("No tools found");
+      return [];
+    }
+    
+    return data.map(mapDbRowToTool);
+  } catch (error) {
+    console.error("Exception fetching tools:", error);
+    throw error;
   }
-  
-  const data = await response.json();
-  return data.map(mapDbRowToTool);
 }
 
 // Function to fetch a single tool by ID
 export async function fetchToolById(id: string): Promise<Tool | null> {
-  const response = await fetch(`https://uttyuqzdklcjnivmeszo.supabase.co/rest/v1/ai_tools?id=eq.${id}`, {
-    method: 'GET',
-    headers: {
-      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0dHl1cXpka2xjam5pdm1lc3pvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1MTA0ODcsImV4cCI6MjA2MjA4NjQ4N30.DdV0z80AK3ybzqgQTDZtHNUW1na61gkJ4RQiAJsWJWQ',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0dHl1cXpka2xjam5pdm1lc3pvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1MTA0ODcsImV4cCI6MjA2MjA4NjQ4N30.DdV0z80AK3ybzqgQTDZtHNUW1na61gkJ4RQiAJsWJWQ'
+  try {
+    const { data, error } = await supabase
+      .from('ai_tools')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching tool:", error);
+      throw new Error(`Error fetching tool: ${error.message}`);
     }
-  });
-
-  if (!response.ok) {
-    throw new Error(`Error fetching tool: ${response.statusText}`);
+    
+    if (!data) {
+      return null;
+    }
+    
+    return mapDbRowToTool(data);
+  } catch (error) {
+    console.error("Exception fetching tool by id:", error);
+    throw error;
   }
-
-  const data = await response.json();
-  
-  if (data.length === 0) {
-    return null;
-  }
-  
-  return mapDbRowToTool(data[0]);
 }
+
+// Function to get featured tools (for homepage)
+export const getFeaturedTools = async (): Promise<Tool[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('ai_tools')
+      .select('*')
+      .limit(3);  // Just show 3 featured tools
+    
+    if (error) {
+      console.error("Error fetching featured tools:", error);
+      return [];
+    }
+    
+    return data?.map(mapDbRowToTool) || [];
+  } catch (error) {
+    console.error("Exception fetching featured tools:", error);
+    return [];
+  }
+};

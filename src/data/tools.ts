@@ -1,4 +1,19 @@
 
+// Categories for the filter component
+export const categories = [
+  'ai',
+  'analytics',
+  'content',
+  'design',
+  'marketing',
+  'productivity',
+  'sales',
+  'seo',
+  'social-media',
+  'writing'
+];
+
+// This type is kept for backward compatibility with components that haven't been updated yet
 export interface Tool {
   id: string;
   name: string;
@@ -25,88 +40,23 @@ export interface Tool {
   };
 }
 
-// Extract unique categories for filtering
-export const categories = [
-  {
-    id: 'ai',
-    name: 'AI',
-    description: 'Artificial Intelligence tools and solutions',
-    icon: '🤖'
-  },
-  {
-    id: 'analytics',
-    name: 'Analytics',
-    description: 'Data analysis and reporting tools',
-    icon: '📊'
-  },
-  {
-    id: 'content',
-    name: 'Content',
-    description: 'Content creation and management tools',
-    icon: '📝'
-  },
-  {
-    id: 'design',
-    name: 'Design',
-    description: 'Design and creative tools',
-    icon: '🎨'
-  },
-  {
-    id: 'marketing',
-    name: 'Marketing',
-    description: 'Marketing automation and campaign tools',
-    icon: '📣'
-  },
-  {
-    id: 'productivity',
-    name: 'Productivity',
-    description: 'Tools to enhance workflow and efficiency',
-    icon: '⚡'
-  },
-  {
-    id: 'sales',
-    name: 'Sales',
-    description: 'CRM and sales enablement tools',
-    icon: '💰'
-  },
-  {
-    id: 'seo',
-    name: 'SEO',
-    description: 'Search engine optimization tools',
-    icon: '🔍'
-  },
-  {
-    id: 'social-media',
-    name: 'Social Media',
-    description: 'Social media management and analytics',
-    icon: '📱'
-  },
-  {
-    id: 'writing',
-    name: 'Writing',
-    description: 'Writing and editing assistance tools',
-    icon: '✍️'
-  }
-];
-
-// Sample data for featured tools
+// Legacy function to maintain compatibility with existing components
 export const getFeaturedTools = (): Tool[] => {
   return [
     {
       id: "1",
       name: "AI Writer Pro",
       website: "https://example.com/aiwriterpro",
-      category: "Writing",
-      description: "AI Writer Pro helps you create high-quality content in seconds. It's perfect for bloggers, marketers, and content creators who want to save time while maintaining quality.",
+      category: "writing",
+      description: "AI Writer Pro helps you create high-quality content in seconds.",
       logo: "/placeholder.svg",
       shortDescription: "Create stunning content with AI",
       referralAvailable: true,
       freeTrial: true,
       affiliateProgram: false,
       deal: {
-        title: "7-day free trial + 10% off first month",
-        description: "Get started with a 7-day free trial and receive 10% off your first month subscription.",
-        details: "No credit card required for trial. Discount applied automatically."
+        title: "7-day free trial + 10% off",
+        description: "Get started with a 7-day free trial and 10% off.",
       },
       dealType: "free-trial",
       bonusType: "discount",
@@ -116,8 +66,8 @@ export const getFeaturedTools = (): Tool[] => {
       id: "2",
       name: "DataViz Pro",
       website: "https://example.com/datavizpro",
-      category: "Analytics",
-      description: "DataViz Pro transforms your raw data into beautiful, interactive visualizations. Perfect for businesses looking to make data-driven decisions.",
+      category: "analytics",
+      description: "Transform raw data into beautiful visualizations.",
       logo: "/placeholder.svg",
       shortDescription: "Turn data into actionable insights",
       referralAvailable: false,
@@ -129,24 +79,14 @@ export const getFeaturedTools = (): Tool[] => {
       },
       dealType: "free-trial",
       bonusType: "trial",
-      featured: true,
-      n8nWorkflow: {
-        steps: [
-          "Connect your data source to n8n",
-          "Configure the DataViz Pro node",
-          "Set up automatic data refresh",
-          "Deploy your visualization dashboard"
-        ],
-        json: "{\"nodes\":[{\"id\":\"DataVizPro\",\"type\":\"visualization\"}]}",
-        useCase: "Automatically generate weekly sales reports and distribute them to your team."
-      }
+      featured: true
     },
     {
       id: "3",
       name: "SocialBoost",
       website: "https://example.com/socialboost",
-      category: "Social Media",
-      description: "SocialBoost helps you manage all your social media accounts from one place. Schedule posts, analyze engagement, and grow your following with powerful AI-driven recommendations.",
+      category: "social-media",
+      description: "Manage all your social media accounts from one place.",
       logo: "/placeholder.svg",
       shortDescription: "Supercharge your social media presence",
       referralAvailable: true,
