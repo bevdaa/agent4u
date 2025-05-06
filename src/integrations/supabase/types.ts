@@ -11,61 +11,46 @@ export type Database = {
     Tables: {
       ai_tools: {
         Row: {
-          affiliate_link: string | null
-          affiliate_program: string | null
-          category: string
+          category: string[] | null
           created_at: string | null
-          description: string | null
-          id: string
-          integration_type: string | null
+          cta_label: string | null
+          id: number
           logo_url: string | null
-          n8n_json: Json | null
-          referral_bonus: string | null
-          referral_link: string | null
-          signup_bonus: string | null
-          tags: string[] | null
-          tool_name: string
-          tool_url: string
-          trial_benefit: string | null
-          use_case: string | null
+          n8n_use_case: string | null
+          n8n_workflow_url: string | null
+          name: string
+          offer_detail: string | null
+          referral_tag: boolean | null
+          summary: string | null
+          tool_url: string | null
         }
         Insert: {
-          affiliate_link?: string | null
-          affiliate_program?: string | null
-          category: string
+          category?: string[] | null
           created_at?: string | null
-          description?: string | null
-          id?: string
-          integration_type?: string | null
+          cta_label?: string | null
+          id?: number
           logo_url?: string | null
-          n8n_json?: Json | null
-          referral_bonus?: string | null
-          referral_link?: string | null
-          signup_bonus?: string | null
-          tags?: string[] | null
-          tool_name: string
-          tool_url: string
-          trial_benefit?: string | null
-          use_case?: string | null
+          n8n_use_case?: string | null
+          n8n_workflow_url?: string | null
+          name: string
+          offer_detail?: string | null
+          referral_tag?: boolean | null
+          summary?: string | null
+          tool_url?: string | null
         }
         Update: {
-          affiliate_link?: string | null
-          affiliate_program?: string | null
-          category?: string
+          category?: string[] | null
           created_at?: string | null
-          description?: string | null
-          id?: string
-          integration_type?: string | null
+          cta_label?: string | null
+          id?: number
           logo_url?: string | null
-          n8n_json?: Json | null
-          referral_bonus?: string | null
-          referral_link?: string | null
-          signup_bonus?: string | null
-          tags?: string[] | null
-          tool_name?: string
-          tool_url?: string
-          trial_benefit?: string | null
-          use_case?: string | null
+          n8n_use_case?: string | null
+          n8n_workflow_url?: string | null
+          name?: string
+          offer_detail?: string | null
+          referral_tag?: boolean | null
+          summary?: string | null
+          tool_url?: string | null
         }
         Relationships: []
       }

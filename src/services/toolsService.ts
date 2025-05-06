@@ -1,99 +1,52 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
 
 // Define a Tool type that maps to our Supabase table structure
 export type Tool = {
   id: string;
   name: string;
   website: string;
-  category: string;
-  description: string;
   logo: string;
-  shortDescription: string;
-  referralAvailable: boolean;
-  freeTrial: boolean;
-  affiliateProgram: boolean;
-  deal: {
-    title: string;
-    description: string;
-    details?: string;
-  };
-  dealType: 'free-trial' | 'referral' | 'credit' | 'discount';
-  bonusType: string;
-  featured: boolean;
-  n8nWorkflow?: {
-    steps: string[];
-    json: string;
-    useCase: string;
-  };
+  category: string[];
+  summary: string;
+  offer_detail: string;
+  referral_tag: boolean;
+  n8n_use_case?: string;
+  n8n_workflow_url?: string;
+  cta_label: string;
 };
 
-// This function maps a database row to our frontend Tool type
-export function mapDbRowToTool(
-  dbRow: Database['public']['Tables']['ai_tools']['Row']
-): Tool {
-  // Determine dealType based on available fields
-  let dealType: 'free-trial' | 'referral' | 'credit' | 'discount' = 'free-trial';
-  if (dbRow.referral_link) dealType = 'referral';
-  else if (dbRow.signup_bonus) dealType = 'credit';
-  
-  // Determine bonusType
-  let bonusType = 'Free Trial';
-  if (dbRow.referral_bonus) bonusType = 'Referral';
-  else if (dbRow.signup_bonus) bonusType = 'Credit';
-  
+// Function to map Supabase data to our frontend Tool type
+export function mapDbRowToTool(dbRow: any): Tool {
   return {
     id: dbRow.id,
-    name: dbRow.tool_name,
-    website: dbRow.tool_url,
-    category: dbRow.category || 'general',
-    description: dbRow.description || '',
+    name: dbRow.name,
+    website: dbRow.tool_url || '',
     logo: dbRow.logo_url || '/placeholder.svg',
-    shortDescription: dbRow.description?.substring(0, 120) + '...' || '',
-    referralAvailable: !!dbRow.referral_link,
-    freeTrial: !!dbRow.trial_benefit,
-    affiliateProgram: !!dbRow.affiliate_program,
-    dealType: dealType,
-    bonusType: bonusType,
-    featured: true, // Default all tools to featured for now
-    deal: {
-      title: dbRow.trial_benefit || dbRow.signup_bonus || 'Special Offer',
-      description: dbRow.description?.substring(0, 150) + '...' || 'Check website for details',
-      details: dbRow.referral_bonus || undefined
-    },
-    n8nWorkflow: dbRow.n8n_json ? {
-      steps: ((dbRow.n8n_json as any)?.steps || []).map(String),
-      json: JSON.stringify(dbRow.n8n_json, null, 2),
-      useCase: (dbRow.n8n_json as any)?.useCase || dbRow.use_case || 'Automate workflows with this tool'
-    } : undefined
+    category: Array.isArray(dbRow.category) ? dbRow.category : [dbRow.category || 'general'],
+    summary: dbRow.summary || '',
+    offer_detail: dbRow.offer_detail || '',
+    referral_tag: dbRow.referral_tag || false,
+    n8n_use_case: dbRow.n8n_use_case,
+    n8n_workflow_url: dbRow.n8n_workflow_url,
+    cta_label: dbRow.cta_label || 'View Details'
   };
 }
 
 // Function to fetch all tools from Supabase
 export async function fetchAllTools(): Promise<Tool[]> {
-  const { data, error } = await supabase.from('ai_tools').select('*');
+  const response = await fetch('https://uttyuqzdklcjnivmeszo.supabase.co/rest/v1/ai_tools', {
+    method: 'GET',
+    headers: {
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0dHl1cXpka2xjam5pdm1lc3pvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1MTA0ODcsImV4cCI6MjA2MjA4NjQ4N30.DdV0z80AK3ybzqgQTDZtHNUW1na61gkJ4RQiAJsWJWQ',
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0dHl1cXpka2xjam5pdm1lc3pvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY1MTA0ODcsImV4cCI6MjA2MjA4NjQ4N30.DdV0z80AK3ybzqgQTDZtHNUW1na61gkJ4RQiAJsWJWQ'
+    }
+  });
   
-  if (error) {
-    console.error("Error fetching tools:", error);
-    return [];
+  if (!response.ok) {
+    throw new Error(`Error fetching tools: ${response.statusText}`);
   }
   
+  const data = await response.json();
   return data.map(mapDbRowToTool);
-}
-
-// Function to fetch a tool by ID
-export async function fetchToolById(id: string): Promise<Tool | null> {
-  const { data, error } = await supabase
-    .from('ai_tools')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
-  
-  if (error || !data) {
-    console.error("Error fetching tool:", error);
-    return null;
-  }
-  
-  return mapDbRowToTool(data);
 }
