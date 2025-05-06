@@ -5,8 +5,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/ui/PageHeader";
 import AIToolCard from "@/components/tools/AIToolCard";
-import AIToolsFilter from "@/components/tools/AIToolsFilter";
+import ToolFilters from "@/components/tools/ToolFilters";
 import { Tool, fetchAllTools } from "@/services/toolsService";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 const ToolsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -18,12 +20,13 @@ const ToolsPage = () => {
   const [error, setError] = useState<string | null>(null);
   
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    searchParams.get('category')
-  );
-  
-  // Extract unique categories from all tools
-  const categories = [...new Set(tools.flatMap(tool => tool.category))].filter(Boolean) as string[];
+  const [filters, setFilters] = useState({
+    category: searchParams.get('category') || '',
+    referralOnly: searchParams.get('referral') === 'true',
+    affiliateOnly: searchParams.get('affiliate') === 'true',
+    freeTrialOnly: searchParams.get('freeTrial') === 'true',
+    sort: searchParams.get('sort') || 'featured'
+  });
   
   useEffect(() => {
     loadTools();
@@ -38,7 +41,7 @@ const ToolsPage = () => {
       setTools(allTools);
       
       // Apply initial filters
-      applyFilters(allTools, searchQuery, selectedCategory);
+      applyFilters(allTools);
     } catch (err) {
       console.error("Error loading tools:", err);
       setError("Failed to load tools. Please try again later.");
@@ -54,38 +57,20 @@ const ToolsPage = () => {
   
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    applyFilters(tools, query, selectedCategory);
-    
-    // Update URL params
-    const newParams = new URLSearchParams(searchParams);
-    if (query) {
-      newParams.set('search', query);
-    } else {
-      newParams.delete('search');
-    }
-    setSearchParams(newParams);
+    applyFilters(tools);
   };
   
-  const handleCategorySelect = (category: string | null) => {
-    setSelectedCategory(category);
-    applyFilters(tools, searchQuery, category);
-    
-    // Update URL params
-    const newParams = new URLSearchParams(searchParams);
-    if (category) {
-      newParams.set('category', category);
-    } else {
-      newParams.delete('category');
-    }
-    setSearchParams(newParams);
+  const handleFilterChange = (newFilters: any) => {
+    setFilters({...filters, ...newFilters});
+    applyFilters(tools);
   };
   
-  const applyFilters = (allTools: Tool[], query: string, category: string | null) => {
+  const applyFilters = (allTools: Tool[]) => {
     let result = [...allTools];
     
     // Apply search filter
-    if (query) {
-      const lowercaseQuery = query.toLowerCase();
+    if (searchQuery) {
+      const lowercaseQuery = searchQuery.toLowerCase();
       result = result.filter(tool => 
         tool.name.toLowerCase().includes(lowercaseQuery) || 
         tool.summary.toLowerCase().includes(lowercaseQuery)
@@ -93,12 +78,24 @@ const ToolsPage = () => {
     }
     
     // Apply category filter
-    if (category) {
+    if (filters.category) {
       result = result.filter(tool => 
         tool.category.some(cat => 
-          typeof cat === 'string' && cat.toLowerCase() === category.toLowerCase()
+          typeof cat === 'string' && cat.toLowerCase() === filters.category.toLowerCase()
         )
       );
+    }
+    
+    // Apply feature filters
+    if (filters.referralOnly) {
+      result = result.filter(tool => tool.referral_tag);
+    }
+    
+    // Add sort logic
+    if (filters.sort === 'az') {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (filters.sort === 'za') {
+      result.sort((a, b) => b.name.localeCompare(a.name));
     }
     
     setFilteredTools(result);
@@ -114,11 +111,9 @@ const ToolsPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-1">
           <div className="sticky top-24">
-            <AIToolsFilter 
-              categories={categories}
+            <ToolFilters 
               onSearch={handleSearch}
-              onCategorySelect={handleCategorySelect}
-              selectedCategory={selectedCategory}
+              onFilterChange={handleFilterChange}
             />
           </div>
         </div>
@@ -140,10 +135,13 @@ const ToolsPage = () => {
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <h3 className="text-xl font-medium mb-2 text-red-600">Error Loading Tools</h3>
-              <p className="text-gray-600">{error}</p>
-              <Button onClick={loadTools} className="mt-4">
-                Try Again
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>
+                  {error}
+                </AlertDescription>
+              </Alert>
+              <Button onClick={loadTools} className="mt-4" variant="default">
+                <ReloadIcon className="mr-2 h-4 w-4" /> Try Again
               </Button>
             </div>
           ) : filteredTools.length > 0 ? (
